@@ -12,10 +12,24 @@ public class MyRobot extends BCAbstractRobot {
     //     this.units = new HashMap<>();
     //     this.unitFactory = new UnitFactory(me);
     // }    
-    ArrayList<Robot> enemyBots = new ArrayList<>();
 
+    Robot enemyBot;
+
+    //CRUSADER VARS
+    int enemyID;
+    int enemyX;
+    int enemyY;
+    double randomDirX;
+    double randomDirY;
 
     public Action turn() {
+        
+        log("Attempting to search for enemy bots...");
+        if(getVisibleRobots()[0].team != me.team){
+            enemyBot = getVisibleRobots()[0];
+            log("Enemy bot found.");
+        } 
+
         if(me.unit == SPECS.CASTLE){
             // insert logic here
             log("Building a crusader.");
@@ -23,17 +37,34 @@ public class MyRobot extends BCAbstractRobot {
         }
         if(me.unit == SPECS.CRUSADER){
             log("Position: X(" + me.x + ") Y(" + me.y + ")");
-            if(getVisibleRobots() != null && me.turn >= 75){
-                log("Enemy has been detected, attempting to attack.");
-                int enemyID = getVisibleRobots()[0].id;
-                int enemyX = getRobot(enemyID).x;
-                int enemyY = getRobot(enemyID).y;
+            log("Setting random directional variables back to 0...");
+            randomDirX = 0;
+            randomDirY = 0;
+            log("Directional variables set.");
+            // attacking code
+            if(enemyBot != null){
+                log("Recording Enemy coords...");
+                enemyX = enemyBot.x;
+                enemyY = enemyBot.y;
+                log("Enemy coords recorded, resetting enemy bot target");
+                enemyBot = null;
+                log("enemy bot reset, attacking robot");
                 return attack(enemyY, enemyX);
-            }  
-            log("about to move");
-            return move(2,-1);            
+            } else {
+                log("generating random directons...");
+                log(" " + ((int)Math.round(2.0*Math.random()-1)));
+                randomDirX = ((int)Math.round(2.0*Math.random()-1));
+                randomDirY = ((int)Math.round(2.0*Math.random()-1));
+                log("random directions set. X: " + randomDirX + " Y: " + randomDirY);
+                if(checkDir(me, randomDirX, randomDirY)){
+                    log("about to move in " + randomDirX + ", " + randomDirY);
+                    return move((int) randomDirX,(int) randomDirY);  
+                } else {
+                   return null;
+                }
+            }
+            
         }
-
         // switch (me.unit) {
         //     case SPECS.CASTLE:
                 
@@ -46,7 +77,16 @@ public class MyRobot extends BCAbstractRobot {
         //         return move(1,1);
         // }
     }
-    
+    private boolean checkDir(Robot me, double vertDir, double horizDir) {
+        
+         if( (vertDir >= -1 && vertDir <= 1) && (horizDir >= -1 && horizDir <= 1) ){
+            if(this.getPassableMap()[(int)vertDir][(int)horizDir]){
+                return getPassableMap()[(int)vertDir][(int)horizDir];
+            }
+         } else{
+            return false;
+         }
+    }
     // public List<Unit> getUnits() {
     //     return units.values();    
     // }
@@ -54,7 +94,6 @@ public class MyRobot extends BCAbstractRobot {
     // private Action castleLogic() {
          
     // }
-    
 }
 
 // public class UnitFactory {
