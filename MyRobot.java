@@ -19,21 +19,34 @@ public class MyRobot extends BCAbstractRobot {
     int enemyID;
     int enemyX;
     int enemyY;
-    double randomDirX;
-    double randomDirY;
+    int randomDirX;
+    int randomDirY;
+                //      SW -1 1 / W -1 0 / NW -1 -1 / N 0 1 / NE 1 -1 / E 1 0 / SE 1 1 / S 0 1
+    int[] directionX = {-1,-1,-1,0, 1,1,1,0};
+    int[] directionY = {-1,0 ,-1,1,-1,0,1,1};
 
     public Action turn() {
-        
+        enemyBot = null;
+
         log("Attempting to search for enemy bots...");
         if(getVisibleRobots()[0].team != me.team){
             enemyBot = getVisibleRobots()[0];
             log("Enemy bot found.");
-        } 
+        } else {
+            log("No enemies found.");
+        }
 
         if(me.unit == SPECS.CASTLE){
-            // insert logic here
-            log("Building a crusader.");
-            return buildUnit(SPECS.CRUSADER, 1, 1);
+            log("Generating direction to build in.");
+            randomDirX = directionX[ ( (int)(Math.round(Math.random()*7) ) ) ];
+            randomDirY = directionY[ ( (int)(Math.round(Math.random()*7) ) ) ];
+            log("Direction " + randomDirX + ", " + randomDirY + " generated. Testing if open for building.");
+            if( checkDir(me, randomDirX, randomDirY, me.x, me.y) ){
+                log("about to build Crusader in " + randomDirX + ", " + randomDirY);
+                return buildUnit(SPECS.CRUSADER, 1, 1);
+            } else {
+                return null;
+            } 
         }
         if(me.unit == SPECS.CRUSADER){
             log("Position: X(" + me.x + ") Y(" + me.y + ")");
@@ -44,21 +57,23 @@ public class MyRobot extends BCAbstractRobot {
             // attacking code
             if(enemyBot != null){
                 log("Recording Enemy coords...");
-                enemyX = enemyBot.x;
-                enemyY = enemyBot.y;
-                log("Enemy coords recorded, resetting enemy bot target");
-                enemyBot = null;
-                log("enemy bot reset, attacking robot");
-                return attack(enemyY, enemyX);
+                enemyX = enemyBot.x-me.x;
+                enemyY = enemyBot.y-me.y;
+                log("Enemy coords recorded, attacking robot");
+                return attack(enemyX, enemyY);
             } else {
-                log("generating random directons...");
-                log(" " + ((int)Math.round(2.0*Math.random()-1)));
-                randomDirX = ((int)Math.round(2.0*Math.random()-1));
-                randomDirY = ((int)Math.round(2.0*Math.random()-1));
-                log("random directions set. X: " + randomDirX + " Y: " + randomDirY);
-                if(checkDir(me, randomDirX, randomDirY)){
+                // log("generating random directons...");
+                // randomDirX = ((int)Math.floor(Math.random()*2)-1);
+                // log("X coord generated");
+                // randomDirY = ((int)Math.floor(Math.random()*2)-1);
+                // log("random directions set. X: " + randomDirX + " Y: " + randomDirY);
+                log("Generating direction.");
+                randomDirX = directionX[ ( (int)(Math.round(Math.random()*7) ) ) ];
+                randomDirY = directionY[ ( (int)(Math.round(Math.random()*7) ) ) ];
+                log("Direction " + randomDirX + ", " + randomDirY + " generated. Testing if passible.");
+                if( checkDir(me, randomDirX, randomDirY, me.x, me.y) ){
                     log("about to move in " + randomDirX + ", " + randomDirY);
-                    return move((int) randomDirX,(int) randomDirY);  
+                    return move(randomDirX, randomDirY);  
                 } else {
                    return null;
                 }
@@ -77,15 +92,17 @@ public class MyRobot extends BCAbstractRobot {
         //         return move(1,1);
         // }
     }
-    private boolean checkDir(Robot me, double vertDir, double horizDir) {
-        
-         if( (vertDir >= -1 && vertDir <= 1) && (horizDir >= -1 && horizDir <= 1) ){
-            if(this.getPassableMap()[(int)vertDir][(int)horizDir]){
-                return getPassableMap()[(int)vertDir][(int)horizDir];
-            }
-         } else{
+    private boolean checkDir(Robot me, int relativeX, int relativeY, int currentLocX, int currentLocY) {
+        log("About to check if coords " + relativeX + ", " + relativeY + " are passible...");  
+
+        if(this.getPassableMap()[currentLocX+relativeX][currentLocY+relativeY]){
+            log("Coords are passible.");
+            return getPassableMap()[currentLocX+relativeX][currentLocY+relativeY];
+        } else{
+            log("Not passible, returning false.");
             return false;
-         }
+        }
+         
     }
     // public List<Unit> getUnits() {
     //     return units.values();    
