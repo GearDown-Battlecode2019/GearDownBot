@@ -11,7 +11,24 @@ public class MyRobot extends BCAbstractRobot {
     // public MyRobot() {
     //     this.units = new HashMap<>();
     //     this.unitFactory = new UnitFactory(me);
-    // }    
+    // }  
+
+    /** 
+
+    PYTHON REFLECT CODE
+
+    def reflect(full_map, loc, horizontal=True):
+    v_reflec = (len(full_map[0]) - loc[0], loc[1])
+    h_reflec = (loc[0], len(full_map) - loc[1])
+    if horizontal:
+        return h_reflec if full_map[h_reflec[1]][h_reflec[0]] else v_reflec
+    else:
+        return v_reflec if full_map[v_reflec[1]][v_reflec[0]] else h_reflec
+        
+        */
+
+
+
 
     Robot enemyBot;
 
