@@ -41,6 +41,12 @@ public class MyRobot extends BCAbstractRobot {
     int randNum;
     boolean firstTurnAlive = true;
     int karbRange = 20;
+
+    int homeLocationX;
+    int homeLocationY;
+    int targetLocationX;
+    int targetLocationY;
+
                 //SW -1 1 / W -1 0 / NW -1 -1 / N 0 1 / NE 1 -1 / E 1 0 / SE 1 1 / S 0 1
     int[] directionX = {-1,-1,-1,0, 1,1,1,0};
     int[] directionY = {-1,0 ,-1,1,-1,0,1,1};
@@ -62,18 +68,23 @@ public class MyRobot extends BCAbstractRobot {
             log("No enemies found.");
         }
 
+
+
+
         if(me.unit == SPECS.CASTLE){
+        	log(" ");
+        	log("I am a CASTLE.");
             log("Generating direction number.");
             randNum = ( (int)(Math.floor(Math.random()*7) ) );
-            log("Number " + randNum + " generated. Applying to directions.");
+            log("Number " + randNum + " generated. Applying to direction.");
             randomDirX = directionX[ randNum ];
             randomDirY = directionY[ randNum ];
             log("Direction " + randomDirX + ", " + randomDirY + " generated. Testing if open for building.");
             if( checkDir(me, randomDirX, randomDirY, me.x, me.y) ){
-                if(Math.round(Math.random()) > 0){
-                    log("about to build Crusader in " + randomDirX + ", " + randomDirY);
-                    return buildUnit(SPECS.CRUSADER, 1, 1);
-                } else if(Math.round(Math.random()) == 0){
+                 if(Math.round(Math.random()*2) > 1){
+                     log("about to build Crusader in " + randomDirX + ", " + randomDirY);
+                     return buildUnit(SPECS.CRUSADER, 1, 1);
+                } else  if(Math.round(Math.random()) == 0){
                     log("about to build Pilgrim in " + randomDirX + ", " + randomDirY);
                     return buildUnit(SPECS.PILGRIM, 1, 1);
                 }
@@ -81,7 +92,14 @@ public class MyRobot extends BCAbstractRobot {
                 return null;
             } 
         }
+
+
+
+
+
         if(me.unit == SPECS.CRUSADER){
+        	log(" ");
+        	log("I am a CRUSADER.");
             log("Position: X(" + me.x + ") Y(" + me.y + ")");
             log("Setting random directional variables back to 0...");
             randomDirX = 0;
@@ -115,35 +133,32 @@ public class MyRobot extends BCAbstractRobot {
             }
         }
 
-        if(me.unit == SPECS.PILGRIM){
-            if(firstTurnAlive = true){
-                log("First turn alive, looking for Karbonite mines...");
-                ArrayList<Integer> karbX = checkKarb(me, me.x, me.y, true);
-                ArrayList<Integer> karbY = checkKarb(me, me.x, me.y, false);
-                firstTurnAlive = false;
-                log(karbX + " " + karbY);
-            }
-            if(getKarboniteMap()[me.y][me.x] = true){
-                log("can mine karbonite mine");
-                if(me.karbonite < 20){
-                    log("mining location now...");
-                    return mine();
-                }
-            } else {
-                log("Generating number for direciton...");
-                randNum = ( (int)(Math.floor(Math.random()*7) ) );
-                log("Number " + randNum + " generated. Applying to direction.");
-                randomDirX = directionX[ randNum ];
-                randomDirY = directionY[ randNum ];
-                log("Direction " + randomDirX + ", " + randomDirY + " generated. Testing if passible.");
-                if( checkDir(me, randomDirX, randomDirY, me.x, me.y) ){
-                    log("about to move in " + randomDirX + ", " + randomDirY);
-                    return move(randomDirX, randomDirY);  
-                } else {
-                    return null;
-                }  
-            }
 
+
+
+
+
+        if(me.unit == SPECS.PILGRIM){
+        	log(" ");
+        	log("I am a PILGRIM.");
+           	if(firstTurnAlive){
+           		log("First turn alive, looking for Karbonite mines...");
+           		ArrayList<Integer> karbX = checkKarb(me, me.x, me.y, true);
+            	ArrayList<Integer> karbY = checkKarb(me, me.x, me.y, false);
+            	firstTurnAlive = false;
+            	log("X coordinates returned: " + karbX + ". Y: " + karbY + ".");
+            	log("Self X: " + me.x + " Y: " + me.y);
+            	homeLocationX = me.x;
+            	homeLocationY = me.y;
+            	//targetLocationX = findNearestKarbMine(me, karbX, karbY, true);
+
+
+           	}
+            if(getKarboniteMap()[me.y][me.x] = true && me.karbonite < 20){
+                log("Karbonite mine is here, and inventory has space. Mining now...");
+                return mine();
+            }
+			
 
             
         }
@@ -160,8 +175,8 @@ public class MyRobot extends BCAbstractRobot {
         //         return move(1,1);
         // }
     }
-
     private boolean checkDir(Robot me, int relativeX, int relativeY, int currentLocX, int currentLocY) {
+    	log(" ");
         log("About to check if coords " + relativeX + ", " + relativeY + " are passible...");  
 
         if(this.getPassableMap()[currentLocY+relativeY][currentLocX+relativeX]){
@@ -173,17 +188,27 @@ public class MyRobot extends BCAbstractRobot {
         }
          
     }
-
     private ArrayList<Integer> checkKarb(Robot me, int currentX, int currentY, boolean returnX){
+    	log(" ");
         log("Beginning mildly dangerous loop...");
-        for(int xTile = -karbRange; xTile > karbRange; xTile++){
-            for(int yTile = -karbRange; yTile > karbRange; yTile++){
-                log("Tile " + (currentX + xTile) + ", " + (currentY + yTile));
-                if(getKarboniteMap()[yTile+currentY][xTile+currentX] = true){
-                    log("Tile " + (currentX + xTile) + ", " + (currentY + yTile) + " contains a Karbonite deposit. Writing to memory...");
-                    karbX.add(xTile+currentX);
-                    karbY.add(yTile+currentY);
-                    log("Tile " + (currentX + xTile) + ", " + (currentY + yTile) + " written to memory. Restarting loop for next tile.");
+        int checkX;
+        int checkY;
+        for(int x = -karbRange; x < karbRange; x++){
+        	log("Beginning X Tile " + checkX);
+            for(int y = -karbRange; y < karbRange; y++){
+            	log("Beginning Y Tile " + checkY);
+            	checkX = (currentX+x);
+            	checkY = (currentY+y);
+                log("Tile " + checkX + ", " + checkY);
+                	if((checkX >= 0) && (checkY >= 0)){
+                		if(getKarboniteMap()[checkY][checkX] == true){
+                    	log("Tile " + checkX + ", " + (checkY) + " contains a Karbonite deposit. Writing to memory...");
+                    	karbX.add(checkX);
+                    	karbY.add(checkY);
+                    	log("Tile " + (checkX) + ", " + (checkY) + " written to memory. Restarting loop for next tile.");
+                	} else {
+                		log("Tile " + (checkX) + ", " + (checkY) + " doesn't contain any Karbonite.");
+                	}
                 }
             }
         }
@@ -196,6 +221,26 @@ public class MyRobot extends BCAbstractRobot {
             return karbY;
         }
     }
+    // private int findNearestKarbMine(Robot me, ArrayList<Integer> karbX, ArrayList<Integer> karbY, boolean returnX){
+    // 	int lowestDistX = Math.abs(karbRange);
+    // 	int lowestDistY = Math.abs(karbRange);
+    // 	int lowestDistInstance = 0;
+    	
+    // 	for(int x = -karbX.length; x < karbX.length; x++){
+    // 		for(int y = -karbY.length; y < karbY.length; y++){
+    // 			if( (Math.abs(karbX[x]) <= lowestDistX) && (Math.abs(karbY[y]) <= lowestDistY) ){
+    				
+    // 			}
+    // 		}
+
+
+    // 	}
+
+
+
+
+    // }
+
 
 
 
