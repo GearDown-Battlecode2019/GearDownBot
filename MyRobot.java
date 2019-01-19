@@ -1,8 +1,9 @@
-package bc19;
+package GearDownBot;
 
 import java.util.ArrayList;
 import java.lang.Object;
 import java.util.*;
+import ImportTest.*;
 
 public class MyRobot extends BCAbstractRobot {
 
@@ -29,11 +30,8 @@ public class MyRobot extends BCAbstractRobot {
         */
 
 
-
-
     Robot enemyBot;
 
-    //CRUSADER VARS
     int enemyID;
     int enemyX;
     int enemyY;
@@ -41,7 +39,7 @@ public class MyRobot extends BCAbstractRobot {
     int randomDirY;
     int randNum;
     boolean firstTurnAlive = true;
-    int karbRange = 10;
+    int karbRange = 20;
 
     int homeLocationX;
     int homeLocationY;
@@ -55,8 +53,7 @@ public class MyRobot extends BCAbstractRobot {
     int nearestKarSourceX;
     int nearestKarSourceY;
 
-    ArrayList<Integer> karbX = new ArrayList<Integer>();
-    ArrayList<Integer> karbY = new ArrayList<Integer>();
+    ArrayList<Integer[]> karboniteMines = new ArrayList<Integer[]>();
 
     public Action turn() {
     	log("BEGINNING ROUND " + me.turn);
@@ -69,34 +66,37 @@ public class MyRobot extends BCAbstractRobot {
         } else {
             log("No enemies found.");
         }
-
-
-
+        
 
         if(me.unit == SPECS.CASTLE){
         	log(" ");
         	log("I am a CASTLE.");
-            log("Generating direction number.");
-            randNum = ( (int)(Math.floor(Math.random()*7) ) );
-            log("Number " + randNum + " generated. Applying to direction.");
-            randomDirX = directionX[ randNum ];
-            randomDirY = directionY[ randNum ];
-            log("Direction " + randomDirX + ", " + randomDirY + " generated. Testing if open for building.");
-            if( checkDir(me, randomDirX, randomDirY, me.x, me.y) ){
-                if(me.turn >= 5){
-                     log("about to build Crusader in " + randomDirX + ", " + randomDirY);
-                     return buildUnit(SPECS.CRUSADER, 1, 1);
-                } else if(me.turn < 5){
-                    log("about to build Pilgrim in " + randomDirX + ", " + randomDirY);
-                    return buildUnit(SPECS.PILGRIM, 1, 1);
-                }
+            if(enemyBot != null){
+                log("Recording Enemy coords...");
+                enemyX = enemyBot.x-me.x;
+                enemyY = enemyBot.y-me.y;
+                log("Enemy coords recorded, attacking robot");
+                return attack(enemyX, enemyY);
             } else {
-                return null;
-            } 
+                log("Generating direction number.");
+                randNum = ( (int)(Math.floor(Math.random()*8) ) );
+                log("Number " + randNum + " generated. Applying to direction.");
+                randomDirX = directionX[ randNum ];
+                randomDirY = directionY[ randNum ];
+                log("Direction " + randomDirX + ", " + randomDirY + " generated. Testing if open for building.");
+                if( checkDir(me, randomDirX, randomDirY, me.x, me.y) ){
+                    if(me.turn >= 5){
+                         log("about to build Crusader in " + randomDirX + ", " + randomDirY);
+                         return buildUnit(SPECS.CRUSADER, 1, 1);
+                    } else if(me.turn < 5){
+                        log("about to build Pilgrim in " + randomDirX + ", " + randomDirY);
+                        return buildUnit(SPECS.PILGRIM, 1, 1);
+                    }
+                  } else {
+                    return null;
+                } 
+            }
         }
-
-
-
 
 
         if(me.unit == SPECS.CRUSADER){
@@ -121,7 +121,7 @@ public class MyRobot extends BCAbstractRobot {
                 // randomDirY = ((int)Math.floor(Math.random()*2)-1);
                 // log("random directions set. X: " + randomDirX + " Y: " + randomDirY);
                 log("Generating number for direciton...");
-                randNum = ( (int)(Math.floor(Math.random()*7) ) );
+                randNum = ( (int)(Math.floor(Math.random()*8) ) );
                 log("Number " + randNum + " generated. Applying to direction.");
                 randomDirX = directionX[ randNum ];
                 randomDirY = directionY[ randNum ];
@@ -136,26 +136,21 @@ public class MyRobot extends BCAbstractRobot {
         }
 
 
-
-
-
-
         if(me.unit == SPECS.PILGRIM){
         	log(" ");
         	log("I am a PILGRIM.");
            	if(firstTurnAlive){
            		log("First turn alive, looking for Karbonite mines...");
            		firstTurnAlive = false;
-           		ArrayList<Integer> karbX = checkKarb(me, me.x, me.y, true);
-            	ArrayList<Integer> karbY = checkKarb(me, me.x, me.y, false);
-            	log("X coordinates returned: " + karbX + ". Y: " + karbY + ".");
+           		ArrayList<Integer[]> karbMines = checkKarb(me, me.x, me.y);
+            	log("Coords returned, " + karbMines);
             	log("Self X: " + me.x + " Y: " + me.y);
             	homeLocationX = me.x;
             	homeLocationY = me.y;
-            	log("Finding and recording closest Karbonite Mine...");
-            	targetLocationX = findNearestKarbMine(me, karbX, karbY, true);
-            	targetLocationY = findNearestKarbMine(me, karbX, karbY, false);
-            	log("Karbonite Mine Location recorded.");
+            	// log("Finding and recording closest Karbonite Mine...");
+            	// targetLocationX = findNearestKarbMine(me, karbX, karbY, true);
+            	// targetLocationY = findNearestKarbMine(me, karbX, karbY, false);
+            	// log("Karbonite Mine Location recorded.");
 
 
            	}
@@ -193,7 +188,7 @@ public class MyRobot extends BCAbstractRobot {
         }
          
     }
-    private ArrayList<Integer> checkKarb(Robot me, int currentX, int currentY, boolean returnX){
+    private ArrayList<Integer[]> checkKarb(Robot me, int currentX, int currentY){
     	log(" ");
         log("Beginning mildly dangerous loop...");
         int checkX;
@@ -218,42 +213,27 @@ public class MyRobot extends BCAbstractRobot {
             }
         }
         log("Loop completed. Returning value...");
-        if(returnX){
-            log("X");
-            return karbX;
-        } else {
-            log("Y");
-            return karbY;
-        }
+        return 
     }
-    private int findNearestKarbMine(Robot me, ArrayList<Integer> karbX, ArrayList<Integer> karbY, boolean returnX){
-    	ArrayList<Integer> karbSortX = karbX; 
-		ArrayList<Integer> karbSortY = karbY;
+  //   private int findNearestKarbMine(Robot me, ArrayList<Integer> karbX, ArrayList<Integer> karbY, boolean returnX){
+  //   	ArrayList<Integer> karbSortX = karbX; 
+		// ArrayList<Integer> karbSortY = karbY;
 
-    	if(karbX == null){
-    		log("X array list is null.");
-    		return 0;
-    	} else if(karbY == null) {
-			log("Y array list is null.");
-    		return 0;
-    	} else if(karbX == null && karbY == null){
-    		log("Both array lists are null.");
-    		return 0;
-    	} else {
-    		log("X Raw: " + this.karbX + " Y Raw: " + this.karbY);
-    		Collections.sort(karbSortX);
-	    	Collections.sort(karbSortY);
-    		log("X Sorted: " + karbSortX + " Y Sorted: " + karbSortY);
-    	}
-    	
-
-
-
-
-    }
-
-
-
+  //   	if(karbX == null){
+  //   		log("X array list is null.");
+  //   		return 0;
+  //   	} else if(karbY == null) {
+		// 	log("Y array list is null.");
+  //   		return 0;
+  //   	} else if(karbX == null && karbY == null){
+  //   		log("Both array lists are null.");
+  //   		return 0;
+  //   	} else {
+  //   		log("X Raw: " + this.karbX + " Y Raw: " + this.karbY);
+  //   		Collections.sort(karbSortX);
+	 //    	Collections.sort(karbSortY);
+  //   		log("X Sorted: " + karbSortX + " Y Sorted: " + karbSortY);
+  //   	}
 
 }
     // public List<Unit> getUnits() {
