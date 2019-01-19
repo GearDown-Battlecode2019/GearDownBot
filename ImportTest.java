@@ -1,11 +1,14 @@
-package bc19;
+package GearDownBot;
+
+import bc19.*;
+import java.util.ArrayList;
+import java.lang.Object;
+import java.util.*;
 
 public class ImportTest extends BCAbstractRobot {
 
-    public static void importTestMethod(Robot me){
-    	log("");
+    public void importTestMethod(Robot me){
     	log("IMPORTING WORKS!!!");
-    	log("");
     }
 
 }
