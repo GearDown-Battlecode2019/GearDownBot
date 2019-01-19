@@ -1,7 +1,8 @@
 package bc19;
 
 import java.util.ArrayList;
-import java.lang.*;
+import java.lang.Object;
+import java.util.*;
 
 public class MyRobot extends BCAbstractRobot {
 
@@ -40,7 +41,7 @@ public class MyRobot extends BCAbstractRobot {
     int randomDirY;
     int randNum;
     boolean firstTurnAlive = true;
-    int karbRange = 20;
+    int karbRange = 10;
 
     int homeLocationX;
     int homeLocationY;
@@ -58,6 +59,7 @@ public class MyRobot extends BCAbstractRobot {
     ArrayList<Integer> karbY = new ArrayList<Integer>();
 
     public Action turn() {
+    	log("BEGINNING ROUND " + me.turn);
         enemyBot = null;
 
         log("Attempting to search for enemy bots...");
@@ -81,10 +83,10 @@ public class MyRobot extends BCAbstractRobot {
             randomDirY = directionY[ randNum ];
             log("Direction " + randomDirX + ", " + randomDirY + " generated. Testing if open for building.");
             if( checkDir(me, randomDirX, randomDirY, me.x, me.y) ){
-                 if(Math.round(Math.random()*2) > 1){
+                if(me.turn >= 5){
                      log("about to build Crusader in " + randomDirX + ", " + randomDirY);
                      return buildUnit(SPECS.CRUSADER, 1, 1);
-                } else  if(Math.round(Math.random()) == 0){
+                } else if(me.turn < 5){
                     log("about to build Pilgrim in " + randomDirX + ", " + randomDirY);
                     return buildUnit(SPECS.PILGRIM, 1, 1);
                 }
@@ -143,14 +145,17 @@ public class MyRobot extends BCAbstractRobot {
         	log("I am a PILGRIM.");
            	if(firstTurnAlive){
            		log("First turn alive, looking for Karbonite mines...");
+           		firstTurnAlive = false;
            		ArrayList<Integer> karbX = checkKarb(me, me.x, me.y, true);
             	ArrayList<Integer> karbY = checkKarb(me, me.x, me.y, false);
-            	firstTurnAlive = false;
             	log("X coordinates returned: " + karbX + ". Y: " + karbY + ".");
             	log("Self X: " + me.x + " Y: " + me.y);
             	homeLocationX = me.x;
             	homeLocationY = me.y;
-            	//targetLocationX = findNearestKarbMine(me, karbX, karbY, true);
+            	log("Finding and recording closest Karbonite Mine...");
+            	targetLocationX = findNearestKarbMine(me, karbX, karbY, true);
+            	targetLocationY = findNearestKarbMine(me, karbX, karbY, false);
+            	log("Karbonite Mine Location recorded.");
 
 
            	}
@@ -200,8 +205,8 @@ public class MyRobot extends BCAbstractRobot {
             	checkX = (currentX+x);
             	checkY = (currentY+y);
                 log("Tile " + checkX + ", " + checkY);
-                	if((checkX >= 0) && (checkY >= 0)){
-                		if(getKarboniteMap()[checkY][checkX] == true){
+                if((checkX >= 0) && (checkY >= 0)){
+                	if(getKarboniteMap()[checkY][checkX] == true){
                     	log("Tile " + checkX + ", " + (checkY) + " contains a Karbonite deposit. Writing to memory...");
                     	karbX.add(checkX);
                     	karbY.add(checkY);
@@ -221,25 +226,31 @@ public class MyRobot extends BCAbstractRobot {
             return karbY;
         }
     }
-    // private int findNearestKarbMine(Robot me, ArrayList<Integer> karbX, ArrayList<Integer> karbY, boolean returnX){
-    // 	int lowestDistX = Math.abs(karbRange);
-    // 	int lowestDistY = Math.abs(karbRange);
-    // 	int lowestDistInstance = 0;
+    private int findNearestKarbMine(Robot me, ArrayList<Integer> karbX, ArrayList<Integer> karbY, boolean returnX){
+    	ArrayList<Integer> karbSortX = karbX; 
+		ArrayList<Integer> karbSortY = karbY;
+
+    	if(karbX == null){
+    		log("X array list is null.");
+    		return 0;
+    	} else if(karbY == null) {
+			log("Y array list is null.");
+    		return 0;
+    	} else if(karbX == null && karbY == null){
+    		log("Both array lists are null.");
+    		return 0;
+    	} else {
+    		log("X Raw: " + this.karbX + " Y Raw: " + this.karbY);
+    		Collections.sort(karbSortX);
+	    	Collections.sort(karbSortY);
+    		log("X Sorted: " + karbSortX + " Y Sorted: " + karbSortY);
+    	}
     	
-    // 	for(int x = -karbX.length; x < karbX.length; x++){
-    // 		for(int y = -karbY.length; y < karbY.length; y++){
-    // 			if( (Math.abs(karbX[x]) <= lowestDistX) && (Math.abs(karbY[y]) <= lowestDistY) ){
-    				
-    // 			}
-    // 		}
-
-
-    // 	}
 
 
 
 
-    // }
+    }
 
 
 
