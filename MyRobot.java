@@ -1,10 +1,6 @@
-package GearDownBot;
+package bc19;
 
-import bc19.*;
 import java.util.ArrayList;
-import java.lang.Object;
-import java.util.*;
-import GearDownBot.ImportTest.*;
 
 public class MyRobot extends BCAbstractRobot {
     /** 
@@ -46,8 +42,9 @@ public class MyRobot extends BCAbstractRobot {
     int nearestKarSourceY;
 
     public Action turn() {
-        importTestMethod(me);
-    	log("BEGINNING ROUND " + me.turn);
+    	this.log("BEGINNING ROUND " + me.turn);
+        ImportTest.importTestMethod(this);
+
         enemyBot = null;
 
         log("Attempting to search for enemy bots...");
@@ -183,7 +180,7 @@ public class MyRobot extends BCAbstractRobot {
                 if((checkX >= 0) && (checkY >= 0)){
                 	if(getKarboniteMap()[checkY][checkX] == true){
                     	log("Tile " + checkX + ", " + checkY + " contains a Karbonite deposit. Writing to memory...");
-                    	int[] tileCoords = new int[]{checkX, checkY};
+                    	Integer[] tileCoords = new Integer[]{checkX, checkY};
                         karboniteLocations.add(tileCoords);
                     	log("Tile " + checkX + ", " + checkY + " written to memory. Searching next tile.");
                 	} else {
@@ -193,7 +190,7 @@ public class MyRobot extends BCAbstractRobot {
             }
         }
         log("Loop completed. Returning value...");
-        return karboniteMines;
+        return karboniteLocations;
     }
   //   private int findNearestKarbMine(Robot me, ArrayList<Integer> karbX, ArrayList<Integer> karbY, boolean returnX){
   //   	ArrayList<Integer> karbSortX = karbX; 
