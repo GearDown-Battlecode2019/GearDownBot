@@ -1,6 +1,7 @@
 package bc19;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class MyRobot extends BCAbstractRobot {
     /** 
@@ -135,10 +136,10 @@ public class MyRobot extends BCAbstractRobot {
             	log("Self X: " + me.x + " Y: " + me.y);
             	homeLocationX = me.x;
             	homeLocationY = me.y;
-            	// log("Finding and recording closest Karbonite Mine...");
-            	// targetLocationX = findNearestKarbMine(me, karbX, karbY, true);
-            	// targetLocationY = findNearestKarbMine(me, karbX, karbY, false);
-            	// log("Karbonite Mine Location recorded.");
+            	log("Finding and recording closest Karbonite Mine...");
+            	targetLocationX = findNearestKarbMine(me, karbMines, true);
+            	targetLocationY = findNearestKarbMine(me, karbMines, false);
+            	log("Karbonite Mine Location recorded. X: " );
 
 
            	}
@@ -192,24 +193,37 @@ public class MyRobot extends BCAbstractRobot {
         log("Loop completed. Returning value...");
         return karboniteLocations;
     }
-  //   private int findNearestKarbMine(Robot me, ArrayList<Integer> karbX, ArrayList<Integer> karbY, boolean returnX){
-  //   	ArrayList<Integer> karbSortX = karbX; 
-		// ArrayList<Integer> karbSortY = karbY;
+    private int findNearestKarbMine(Robot me, ArrayList<Integer[]> karbUnsorted, boolean returnX){
+    	ArrayList<Integer[]> karbSorted = karbUnsorted; 
 
-  //   	if(karbX == null){
-  //   		log("X array list is null.");
-  //   		return 0;
-  //   	} else if(karbY == null) {
-		// 	log("Y array list is null.");
-  //   		return 0;
-  //   	} else if(karbX == null && karbY == null){
-  //   		log("Both array lists are null.");
-  //   		return 0;
-  //   	} else {
-  //   		log("X Raw: " + this.karbX + " Y Raw: " + this.karbY);
-  //   		Collections.sort(karbSortX);
-	 //    	Collections.sort(karbSortY);
-  //   		log("X Sorted: " + karbSortX + " Y Sorted: " + karbSortY);
-  //   	}
+    	if(karbUnsorted == null){
+    		log("Array list is null.");
+    		return 0;
+    	} else {
+    		log("Raw: " + karbUnsorted);
+    		Collections.sort(karbSorted);
+    		log("Sorted: " + karbSorted);
+    	}
+
+        int shortestDistanceInstance = 0;
+        int[] idealCoords;
+        int[] currentCoords;
+
+        for(int i = 0; i < karbSorted().length; i++){
+            currentCoords = karbSorted.get(i);
+                
+            // GOAL: Check if the absolute value (ABS) of the currentCoords is less than the current idealCoords ABS. if so, then overwrite it.
+
+
+
+
+        }
+
+
+    }
+
+
+
+
 
 }
