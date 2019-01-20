@@ -27,7 +27,7 @@ public class MyRobot extends BCAbstractRobot {
     int randomDirY;
     int randNum;
     boolean firstTurnAlive = true;
-    int karbRange = 20;
+    int karbRange = 10;
 
 
     int homeLocationX;
@@ -74,10 +74,10 @@ public class MyRobot extends BCAbstractRobot {
                 randomDirY = directionY[ randNum ];
                 log("Direction " + randomDirX + ", " + randomDirY + " generated. Testing if open for building.");
                 if( checkDir(me, randomDirX, randomDirY, me.x, me.y) ){
-                    if(me.turn >= 5){
+                    if( (int)(Math.floor(Math.random()*4)) >= 2 ) {
                          log("about to build Crusader in " + randomDirX + ", " + randomDirY);
                          return buildUnit(SPECS.CRUSADER, 1, 1);
-                    } else if(me.turn < 5){
+                    } else {
                         log("about to build Pilgrim in " + randomDirX + ", " + randomDirY);
                         return buildUnit(SPECS.PILGRIM, 1, 1);
                     }
@@ -147,6 +147,7 @@ public class MyRobot extends BCAbstractRobot {
                 log("Karbonite mine is here, and inventory has space. Mining now...");
                 return mine();
             }
+            if(me.karbonite == 20 && )
 			
 
             
@@ -169,55 +170,81 @@ public class MyRobot extends BCAbstractRobot {
     	log(" ");
         ArrayList<Integer[]> karboniteLocations = new ArrayList<Integer[]>();
         log("Beginning mildly dangerous loop...");
-        int checkX;
-        int checkY;
-        for(int x = -karbRange; x < karbRange; x++){
-        	log("Beginning X Tile " + checkX);
-            for(int y = -karbRange; y < karbRange; y++){
-            	log("Beginning Y Tile " + checkY);
-            	checkX = (currentX+x);
-            	checkY = (currentY+y);
-                log("Tile " + checkX + ", " + checkY);
-                if((checkX >= 0) && (checkY >= 0)){
-                	if(getKarboniteMap()[checkY][checkX] == true){
-                    	log("Tile " + checkX + ", " + checkY + " contains a Karbonite deposit. Writing to memory...");
-                    	Integer[] tileCoords = new Integer[]{checkX, checkY};
-                        karboniteLocations.add(tileCoords);
-                    	log("Tile " + checkX + ", " + checkY + " written to memory. Searching next tile.");
-                	} else {
-                		log("Tile " + checkX + ", " + checkY + " doesn't contain any Karbonite.");
-                	}
+
+        for(int x = -karbRange+currentX; x < karbRange+currentX; x++){
+            // if the x coordinate is greater than or equal to 0
+            if(x >= 0){
+                log("Beginning X Tile " + x);
+                for(int y = -karbRange+currentY; y < karbRange+currentY; y++){
+                    if(y >= 0){
+                        log("Beginning Y Tile " + y);
+
+                        log("Tile " + x + ", " + y);
+
+                        if(getKarboniteMap()[y][x] == true){
+
+                            log("Tile " + x + ", " + y + " contains a Karbonite deposit. Writing to memory...");
+
+                            Integer[] tileCoords = new Integer[]{x, y};
+
+                            karboniteLocations.add(tileCoords);
+
+                            log("Tile " + x + ", " + y + " written to memory. Searching next tile.");
+
+                        } else {
+
+                            log("Tile " + x + ", " + y + " doesn't contain any Karbonite.");
+
+                        }
+                    } else {
+                        break;
+                    }
                 }
+            } else {
+                break;
             }
         }
         log("Loop completed. Returning value...");
         return karboniteLocations;
     }
-    private int findNearestKarbMine(Robot me, ArrayList<Integer[]> karbUnsorted, boolean returnX){
-    	ArrayList<Integer[]> karbSorted = karbUnsorted; 
 
-    	if(karbUnsorted == null){
+    private int findNearestKarbMine(Robot me, ArrayList<Integer[]> karbLocations, boolean returnX){
+
+    	if(karbLocations == null){
     		log("Array list is null.");
     		return 0;
-    	} else {
-    		log("Raw: " + karbUnsorted);
-    		Collections.sort(karbSorted);
-    		log("Sorted: " + karbSorted);
-    	}
-
+    	 }
         int shortestDistanceInstance = 0;
-        int[] idealCoords;
-        int[] currentCoords;
+        Integer[] idealCoords;
+        Integer[] currentCoords;
 
-        for(int i = 0; i < karbSorted().length; i++){
-            currentCoords = karbSorted.get(i);
+        for(int i = 0; i < karbLocations.size(); i++){
+            log("Beginning loop with instance " + i + " of karbonite coords, which is " + karbLocations.get(i));
+            currentCoords = karbLocations.get(i);
                 
-            // GOAL: Check if the absolute value (ABS) of the currentCoords is less than the current idealCoords ABS. if so, then overwrite it.
-
-
-
-
+            if(idealCoords == null){
+                log("Ideal Coordinate variable is null, setting to current value to start with. Restarting loop.");
+                currentCoords = idealCoords;
+                break;
+            }
+            log("Checking if absolute values are less than the ideal values");
+            if((Math.abs(currentCoords[0]) < Math.abs(idealCoords[0])) && (Math.abs(currentCoords[1]) < Math.abs(idealCoords[1]))){
+                log("Values are less than ideal values. Overwriting...");
+                idealCoords = currentCoords;
+                shortestDistanceInstance = i;
+            } else{
+                log("Values are not less than ideal values. Moving on.");
+            }
         }
+        log("Current Ideal Coords: " + idealCoords);
+        if(returnX){
+            log("Returning X coord");
+            return idealCoords[0];
+        } else {
+            log("Returning Y coord");
+            return idealCoords[1];
+        }
+
 
 
     }
