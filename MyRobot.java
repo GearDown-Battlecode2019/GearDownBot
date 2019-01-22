@@ -32,6 +32,7 @@ public class MyRobot extends BCAbstractRobot {
 
     int homeLocationX;
     int homeLocationY;
+    int homeDirection;
     int targetLocationX;
     int targetLocationY;
 
@@ -43,7 +44,8 @@ public class MyRobot extends BCAbstractRobot {
     int nearestKarSourceY;
 
     public Action turn() {
-    	this.log("BEGINNING ROUND " + me.turn);
+        log(" ");
+    	log("BEGINNING ROUND " + me.turn);
         ImportTest.importTestMethod(this);
 
         enemyBot = null;
@@ -73,13 +75,15 @@ public class MyRobot extends BCAbstractRobot {
                 randomDirX = directionX[ randNum ];
                 randomDirY = directionY[ randNum ];
                 log("Direction " + randomDirX + ", " + randomDirY + " generated. Testing if open for building.");
-                if( checkDir(me, randomDirX, randomDirY, me.x, me.y) ){
-                    if( (int)(Math.floor(Math.random()*4)) >= 2 ) {
+
+                if( checkDir(me, randomDirX, randomDirY) ){
+
+                    if( (int)(Math.floor(Math.random()*4)) >= 1 ) {
                          log("about to build Crusader in " + randomDirX + ", " + randomDirY);
-                         return buildUnit(SPECS.CRUSADER, 1, 1);
+                         return buildUnit(SPECS.CRUSADER, randomDirX, randomDirY);
                     } else {
                         log("about to build Pilgrim in " + randomDirX + ", " + randomDirY);
-                        return buildUnit(SPECS.PILGRIM, 1, 1);
+                        return buildUnit(SPECS.PILGRIM, randomDirX, randomDirY);
                     }
                   } else {
                     return null;
@@ -115,7 +119,7 @@ public class MyRobot extends BCAbstractRobot {
                 randomDirX = directionX[ randNum ];
                 randomDirY = directionY[ randNum ];
                 log("Direction " + randomDirX + ", " + randomDirY + " generated. Testing if passible.");
-                if( checkDir(me, randomDirX, randomDirY, me.x, me.y) ){
+                if( checkDir(me, randomDirX, randomDirY) ){
                     log("about to move in " + randomDirX + ", " + randomDirY);
                     return move(randomDirX, randomDirY);  
                 } else {
@@ -136,32 +140,119 @@ public class MyRobot extends BCAbstractRobot {
             	log("Self X: " + me.x + " Y: " + me.y);
             	homeLocationX = me.x;
             	homeLocationY = me.y;
+
             	log("Finding and recording closest Karbonite Mine...");
-            	targetLocationX = findNearestKarbMine(me, karbMines, true);
-            	targetLocationY = findNearestKarbMine(me, karbMines, false);
-            	log("Karbonite Mine Location recorded. X: " );
+                if(getKarboniteMap()[me.y][me.x] == true){
+                    log("Currently at karbonite mine, recording location...");
+                    targetLocationX = me.x;
+                    targetLocationY = me.y;
+                } else {
+                    log("Looking around for a mine...");
+                    targetLocationX = findNearestKarbMine(me, karbMines, true);
+                    targetLocationY = findNearestKarbMine(me, karbMines, false);
+                }
+            	
+            	log("Target Mine Location recorded. X: " + targetLocationX + ". Y: " + targetLocationY + ".");
+           	} else {
+                log("Not first turn alive.");
+                if(me.karbonite < 20){
+                    // this runs if Pilgrim isn't full of karbonite
+                    log("Karbonite inventory isn't full. My X: " + me.x + " Karb X: " + targetLocationX);
+                    if(me.x != targetLocationX){
+                        log("X coordinate not equal to target mine.");
+                        // if mine is to the left
+                        if(me.x > targetLocationX){
+                            log("Mine is to the left, moving left.");
+                            return move(-1,0);
+                            //if mine is to the right
+                        } else if(me.x < targetLocationX){
+                            log("Mine is to the right, moving right.");
+                            return move(1,0);
+                        }
+                    } else if(me.y != targetLocationY){
+                        log("Y coordinate not equal to target mine. My Y: " + me.y + " Karb Y: " + targetLocationY);
+                        // if mine is upward
+                        if(me.y > targetLocationY){
+                            log("Mine is upward, moving upward.");
+                            return move(0,-1);
+                            //if mine is downward
+                        } else if(me.y < targetLocationY){
+                            log("Mine is downward, moving down.");
+                            return move(0,1);
+                        }
+                    } else if( (me.x == targetLocationX) && (me.y == targetLocationY) ){
+                        log("Mine coords are equal. Currently at mine. Mining now...");
+                        return mine();
+                    }
+
+                } else {
+                    // this runs if Pilgrim is full of karbonite
+                    if(me.y != homeLocationY){
+                        log("Y coordinate not equal to origin. My Y: " + me.y + " Origin Y: " + homeLocationY);
+                        // if mine is upward
+                        if(me.y > homeLocationY){
+                            log("Origin is upward, moving upward.");
+                            return move(0,-1);
+                            //if mine is downward
+                        } else if(me.y < homeLocationY){
+                            log("Origin is downward, moving down.");
+                            return move(0,1);
+                        }
+                    } else if(me.x != homeLocationX){
+                        log("X coordinate not equal to origin. My X: " + me.x + " Origin X: " + homeLocationX);
+                        // if mine is to the left
+                        if(me.x > homeLocationX){
+                            log("Origin is to the left, moving left.");
+                            return move(-1,0);
+                            //if mine is to the right
+                        } else if(me.x < homeLocationX){
+                            log("Origin is to the right, moving right.");
+                            return move(1,0);
+                        }
+                    } else if( (me.x == homeLocationX) && (me.y == homeLocationY) ){
 
 
-           	}
-            if(getKarboniteMap()[me.y][me.x] = true && me.karbonite < 20){
-                log("Karbonite mine is here, and inventory has space. Mining now...");
-                return mine();
-            }
-            if(me.karbonite == 20 && )
-			
 
-            
+                        log("Home coords are equal. Currently at home. Locating castle...");
+                        for(int x = me.x-1; x <= me.x+1; x++){
+                            for(int y = me.y-1; y <= me.y+1; y++){
+                                log("Starting tile (" + x + ", " + y + ")");
+                               // if()
+
+
+                            }
+                        }
+
+
+
+                        //return give(, , me.karbonite, 0);
+                    }
+
+
+                }
+
+
+
+            }  
         }
     }
-    private boolean checkDir(Robot me, int relativeX, int relativeY, int currentLocX, int currentLocY) {
+
+
+
+
+
+    private boolean checkDir(Robot me, int relativeX, int relativeY) {
     	log(" ");
         log("About to check if coords " + relativeX + ", " + relativeY + " are passible...");  
+        int trueCoordX = me.x+relativeX;
+        int trueCoordY = me.y+relativeY;
+        log("Coords being checked: " + trueCoordX + ", " + trueCoordY + ". Current Coords: " + me.x + ", " + me.y);
 
-        if(this.getPassableMap()[currentLocY+relativeY][currentLocX+relativeX]){
-            log("Coords are passible.");
-            return getPassableMap()[currentLocY+relativeY][currentLocX+relativeX];
-        } else{
-            log("Not passible, returning false.");
+        if(this.getPassableMap()[me.y+relativeY][me.x+relativeX] == true){
+            log("Command returns " + getPassableMap()[me.y+relativeY][me.x+relativeX] + ". Coords are passible. Returning True.");
+            return true;
+        } else {
+            log("Command returns " + getPassableMap()[me.y+relativeY][me.x+relativeX] + ". Coords are not passible. Returning False.");
             return false;
         }
          
@@ -170,46 +261,43 @@ public class MyRobot extends BCAbstractRobot {
     	log(" ");
         ArrayList<Integer[]> karboniteLocations = new ArrayList<Integer[]>();
         log("Beginning mildly dangerous loop...");
-
+        // start with coords for negative karbonite range from robot, then iterates to positive karb range from bot
         for(int x = -karbRange+currentX; x < karbRange+currentX; x++){
-            // if the x coordinate is greater than or equal to 0
+            // if the x coordinate is greater than or equal to 0 (meaning on the map)
             if(x >= 0){
                 log("Beginning X Tile " + x);
+                // search y coords now
                 for(int y = -karbRange+currentY; y < karbRange+currentY; y++){
+                    // if y coord is on the map
                     if(y >= 0){
                         log("Beginning Y Tile " + y);
-
                         log("Tile " + x + ", " + y);
-
+                        //if the current coords being checked contain karb
                         if(getKarboniteMap()[y][x] == true){
-
                             log("Tile " + x + ", " + y + " contains a Karbonite deposit. Writing to memory...");
-
                             Integer[] tileCoords = new Integer[]{x, y};
-
                             karboniteLocations.add(tileCoords);
-
                             log("Tile " + x + ", " + y + " written to memory. Searching next tile.");
-
                         } else {
-
-                            log("Tile " + x + ", " + y + " doesn't contain any Karbonite.");
-
+                            log("Tile " + x + ", " + y + " doesn't have Karbonite.");
                         }
                     } else {
-                        break;
+                        log("Y Tile is off the map, moving to next one.");
+                        continue;
                     }
                 }
             } else {
-                break;
+                log("X Tile is off the map, moving to next one.");
+                continue;
             }
         }
         log("Loop completed. Returning value...");
+        log("");
         return karboniteLocations;
     }
 
     private int findNearestKarbMine(Robot me, ArrayList<Integer[]> karbLocations, boolean returnX){
-
+        log("");
     	if(karbLocations == null){
     		log("Array list is null.");
     		return 0;
@@ -223,9 +311,8 @@ public class MyRobot extends BCAbstractRobot {
             currentCoords = karbLocations.get(i);
                 
             if(idealCoords == null){
-                log("Ideal Coordinate variable is null, setting to current value to start with. Restarting loop.");
-                currentCoords = idealCoords;
-                break;
+                log("Ideal Coordinates set is null, setting to current value to start with.");
+                idealCoords = currentCoords;
             }
             log("Checking if absolute values are less than the ideal values");
             if((Math.abs(currentCoords[0]) < Math.abs(idealCoords[0])) && (Math.abs(currentCoords[1]) < Math.abs(idealCoords[1]))){
@@ -239,14 +326,25 @@ public class MyRobot extends BCAbstractRobot {
         log("Current Ideal Coords: " + idealCoords);
         if(returnX){
             log("Returning X coord");
+            log("");
             return idealCoords[0];
         } else {
             log("Returning Y coord");
+            log("");
             return idealCoords[1];
         }
 
 
 
+    }
+
+    private int findSignalingRobot(Robot me){
+        for(int bot = 0; bot < getVisibleRobots().length; bot++){
+            if( isRadioing(getVisibleRobots()[bot]) ){
+                return getVisibleRobots()[bot].id;
+            }
+        }
+        return 0;
     }
 
 
