@@ -155,30 +155,54 @@ public class MyRobot extends BCAbstractRobot {
             	log("Target Mine Location recorded. X: " + targetLocationX + ". Y: " + targetLocationY + ".");
            	} else {
                 log("Not first turn alive.");
+
                 if(me.karbonite < 20){
                     // this runs if Pilgrim isn't full of karbonite
                     log("Karbonite inventory isn't full. My X: " + me.x + " Karb X: " + targetLocationX);
                     if(me.x != targetLocationX){
                         log("X coordinate not equal to target mine.");
                         // if mine is to the left
-                        if(me.x > targetLocationX){
+                        if(me.x > targetLocationX && checkDir(me, -1, 0)){
                             log("Mine is to the left, moving left.");
                             return move(-1,0);
                             //if mine is to the right
-                        } else if(me.x < targetLocationX){
+                        } else if(me.x < targetLocationX && checkDir(me, 1, 0)){
                             log("Mine is to the right, moving right.");
                             return move(1,0);
+                        } else {
+                            log("Horizontal movement is blocked.");
+
+                            // move up if we can to get around obstacle
+                            if(checkDir(me, 0, -1)) {
+                                log("Moving up to avoid obstacle.");
+                                return move(0,-1);
+                            } else {
+                                // otherwise, move down
+                                log("Moving down to avoid obstacle.");
+                                return move(0, 1);
+                            }
                         }
                     } else if(me.y != targetLocationY){
                         log("Y coordinate not equal to target mine. My Y: " + me.y + " Karb Y: " + targetLocationY);
                         // if mine is upward
-                        if(me.y > targetLocationY){
+                        if(me.y > targetLocationY && checkDir(me, 0, -1)){
                             log("Mine is upward, moving upward.");
                             return move(0,-1);
                             //if mine is downward
-                        } else if(me.y < targetLocationY){
+                        } else if(me.y < targetLocationY && checkDir(me, 0, 1)){
                             log("Mine is downward, moving down.");
                             return move(0,1);
+                        } else {
+                            log("Vertical movement is blocked.");
+
+                            // move left if we can to get around obstacle
+                            if(checkDir(me, -1, 0)) {
+                                log("Moving left to avoid obstacle.");
+                                return move(-1, 0);
+                            } else {
+                                log("Moving right to avoid obstacle.");
+                                return move(1, 0);
+                            }
                         }
                     } else if( (me.x == targetLocationX) && (me.y == targetLocationY) ){
                         log("Mine coords are equal. Currently at mine. Mining now...");
