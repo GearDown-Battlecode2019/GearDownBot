@@ -27,11 +27,17 @@ public class MyRobot extends BCAbstractRobot {
     int randomDirY;
     int randNum;
     boolean firstTurnAlive = true;
+    
     int karbRange = 10;
     int homeCastleID;
     int homeCastleX;
     int homeCastleY;
+    boolean pilgrimExists = false;
+    boolean wasPilgrimJustBuilt = false;
+    int pilgrimID;
 
+    int pilgrimDirX;
+    int pilgrimDirY;
 
     int homeLocationX;
     int homeLocationY;
@@ -81,13 +87,18 @@ public class MyRobot extends BCAbstractRobot {
 
                 if( checkDir(me, randomDirX, randomDirY) ){
                     log("K: " + this.karbonite + " F: " + this.fuel);
-                    if(me.turn >= 2) {
-                        if(this.karbonite >= 15 && this.fuel >= 50){
-                            log("Resources are sufficient. Building Crusader in " + randomDirX + ", " + randomDirY);
-                            return buildUnit(SPECS.CRUSADER, randomDirX, randomDirY);
+                    if(!(me.turn%50 == 0 || !(me.turn >= 2))) {
+                        if((Math.floor(Math.random()*5)) > 4){
+                            if(this.karbonite >= 15 && this.fuel >= 50){
+                                log("Resources are sufficient. Building Crusader in " + randomDirX + ", " + randomDirY);
+                                return buildUnit(SPECS.CRUSADER, randomDirX, randomDirY);
+                            } else {
+                                log("Cannot build Crusader, resources are insufficient.");
+                            }   
                         } else {
-                            log("Cannot build Crusader, resources are insufficient.");
-                        } 
+                            log("Taking a break this turn, as to not overload the compiling.");
+                        }
+                        
                     } else {
                         if(this.karbonite >= 10 && this.fuel >= 50){
                             log("Resources are sufficient. Building Pilgrim in " + randomDirX + ", " + randomDirY + "and broadcasting ID for location searching.");
@@ -154,22 +165,34 @@ public class MyRobot extends BCAbstractRobot {
             	log("Self X: " + me.x + " Y: " + me.y);
             	homeLocationX = me.x;
             	homeLocationY = me.y;
+
                 log("Locating home castle...");
                 homeCastleID = findSignalingRobot(me);
                 log("Home Castle ID: " + homeCastleID);
                 homeCastleX = getRobot(homeCastleID).x;
                 homeCastleY = getRobot(homeCastleID).y;
+
+                log("My ID: " + me.id);
+
                 log("Home Castle Coords: (" + homeCastleX + ", " + homeCastleY + ")");
 
-            	log("Finding and recording closest Karbonite Mine...");
+            	log("Finding and recording a Karbonite Mine...");
                 if(getKarboniteMap()[me.y][me.x] == true){
                     log("Currently at karbonite mine, recording location...");
                     targetLocationX = me.x;
                     targetLocationY = me.y;
                 } else {
                     log("Looking around for a mine...");
-                    targetLocationX = findNearestKarbMine(me, karbMines, true);
-                    targetLocationY = findNearestKarbMine(me, karbMines, false);
+                    if((Math.floor(Math.random()*3) > 2)){
+                        log("Getting Closest Mine");
+                        targetLocationX = findNearestKarbMine(me, karbMines, true);
+                        targetLocationY = findNearestKarbMine(me, karbMines, false);
+                    } else {
+                       log("Getting any Mine"); 
+                       int randomNumber = (int)( Math.floor(Math.random()*karbMines.size()));
+                       targetLocationX = karbMines.get(randomNumber)[0];
+                       targetLocationY = karbMines.get(randomNumber)[1];
+                    }
                 }
             	
             	log("Target Mine Location recorded. X: " + targetLocationX + ". Y: " + targetLocationY + ".");
@@ -190,15 +213,15 @@ public class MyRobot extends BCAbstractRobot {
                         // if mine is to the left
                         if(me.x > targetLocationX) {
                             // if we can't move left, move up or down
-                            if(!checkDir(me, -1, 0)) {
+                            if(!checkDir(me, -2, 0)) {
                                 // move up if we can to get around obstacle
-                                if(checkDir(me, 0, -1)) {
+                                if(checkDir(me, 0, -2)) {
                                     log("Moving up to avoid obstacle.");
-                                    return move(0,-1);
+                                    return move(0,-2);
                                 } else {
                                     // otherwise, move down
                                     log("Moving down to avoid obstacle.");
-                                    return move(0, 1);
+                                    return move(0, 2);
                                 }
                             }
                             log("Mine is to the left, moving left.");
@@ -208,13 +231,13 @@ public class MyRobot extends BCAbstractRobot {
                             // if we can't move right, move up or down
                             if(!checkDir(me, 1, 0)) {
                                 // move up if we can to get around obstacle
-                                if(checkDir(me, 0, -1)) {
+                                if(checkDir(me, 0, -2)) {
                                     log("Moving up to avoid obstacle.");
-                                    return move(0,-1);
+                                    return move(0,-2);
                                 } else {
                                     // otherwise, move down
                                     log("Moving down to avoid obstacle.");
-                                    return move(0, 1);
+                                    return move(0, 2);
                                 }
                             }
                             log("Mine is to the right, moving right.");
@@ -228,12 +251,12 @@ public class MyRobot extends BCAbstractRobot {
                             log("Vertical movement is blocked.");
 
                             // move left if we can to get around obstacle
-                            if(checkDir(me, -1, 0)) {
+                            if(checkDir(me, -2, 0)) {
                                 log("Moving left to avoid obstacle.");
-                                return move(-1, 0);
+                                return move(-2, 0);
                             } else {
                                 log("Moving right to avoid obstacle.");
-                                return move(1, 0);
+                                return move(2, 0);
                             }
                         }
                         
@@ -277,7 +300,10 @@ public class MyRobot extends BCAbstractRobot {
                             log("Origin is to the right, moving right.");
                             return move(1,0);
                         }
+                   // } else if(){
+
                     } else if( (me.x == homeLocationX) && (me.y == homeLocationY) ){
+                        log("My X: " + me.x + ". My Y: " + me.y + ". Castle X: " + homeCastleX + ". Castle Y: " + homeCastleY + ".");
                         return give((homeCastleX-me.x), (homeCastleY-me.y), me.karbonite, 0);
                     }
 
@@ -315,15 +341,18 @@ public class MyRobot extends BCAbstractRobot {
         ArrayList<Integer[]> karboniteLocations = new ArrayList<Integer[]>();
         log("Beginning mildly dangerous loop...");
         // start with coords for negative karbonite range from robot, then iterates to positive karb range from bot
-        for(int x = -karbRange+currentX; x < karbRange+currentX; x++){
+        for(int y = -karbRange+currentY; y < karbRange+currentY; y++){
+
             // if the x coordinate is greater than or equal to 0 (meaning on the map)
-            if(x >= 0){
-                log("Beginning X Tile " + x);
+            if(0 <= y && y <= map.length){
+                log("Beginning Y Tile " + y);
                 // search y coords now
-                for(int y = -karbRange+currentY; y < karbRange+currentY; y++){
+
+                for(int x = -karbRange+currentX; x < karbRange+currentX; x++){
                     // if y coord is on the map
-                    if(y >= 0){
-                        log("Beginning Y Tile " + y);
+                    
+                    if(0 <= x && x <= map.length){
+                        log("Beginning X Tile " + x);
                         log("Tile " + x + ", " + y);
                         //if the current coords being checked contain karb
                         if(getKarboniteMap()[y][x] == true){
@@ -335,12 +364,12 @@ public class MyRobot extends BCAbstractRobot {
                             log("Tile " + x + ", " + y + " doesn't have Karbonite.");
                         }
                     } else {
-                        log("Y Tile is off the map, moving to next one.");
+                        log("X Tile" + x + " is off the map, moving to next one.");
                         continue;
                     }
                 }
             } else {
-                log("X Tile is off the map, moving to next one.");
+                log("Y Tile "+ y + " is off the map, moving to next one.");
                 continue;
             }
         }
@@ -399,9 +428,4 @@ public class MyRobot extends BCAbstractRobot {
         }
         return 0;
     }
-
-
-
-
-
 }
