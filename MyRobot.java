@@ -81,7 +81,7 @@ public class MyRobot extends BCAbstractRobot {
 
                 if( checkDir(me, randomDirX, randomDirY) ){
                     log("K: " + this.karbonite + " F: " + this.fuel);
-                    if( (int)(Math.floor(Math.random()*4)) >= 1 ) {
+                    if(me.turn >= 2) {
                         if(this.karbonite >= 15 && this.fuel >= 50){
                             log("Resources are sufficient. Building Crusader in " + randomDirX + ", " + randomDirY);
                             return buildUnit(SPECS.CRUSADER, randomDirX, randomDirY);
@@ -254,24 +254,7 @@ public class MyRobot extends BCAbstractRobot {
                             return move(1,0);
                         }
                     } else if( (me.x == homeLocationX) && (me.y == homeLocationY) ){
-
-
-
-                        log("Home coords are equal. Currently at home. Locating castle...");
-                        for(int x = me.x-1; x <= me.x+1; x++){
-                            for(int y = me.y-1; y <= me.y+1; y++){
-                                log("Starting tile (" + x + ", " + y + ")");
-                                //if(ge){
-
-                                
-
-
-                            }
-                        }
-
-
-
-                        //return give(, , me.karbonite, 0);
+                        return give((homeCastleX-me.x), (homeCastleY-me.y), me.karbonite, 0);
                     }
 
 
