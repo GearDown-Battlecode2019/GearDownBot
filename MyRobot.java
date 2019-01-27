@@ -28,6 +28,9 @@ public class MyRobot extends BCAbstractRobot {
     int randNum;
     boolean firstTurnAlive = true;
     int karbRange = 10;
+    int homeCastleID;
+    int homeCastleX;
+    int homeCastleY;
 
 
     int homeLocationX;
@@ -77,17 +80,28 @@ public class MyRobot extends BCAbstractRobot {
                 log("Direction " + randomDirX + ", " + randomDirY + " generated. Testing if open for building.");
 
                 if( checkDir(me, randomDirX, randomDirY) ){
-
+                    log("K: " + this.karbonite + " F: " + this.fuel);
                     if( (int)(Math.floor(Math.random()*4)) >= 1 ) {
-                         log("about to build Crusader in " + randomDirX + ", " + randomDirY);
-                         return buildUnit(SPECS.CRUSADER, randomDirX, randomDirY);
+                        if(this.karbonite >= 15 && this.fuel >= 50){
+                            log("Resources are sufficient. Building Crusader in " + randomDirX + ", " + randomDirY);
+                            return buildUnit(SPECS.CRUSADER, randomDirX, randomDirY);
+                        } else {
+                            log("Cannot build Crusader, resources are insufficient.");
+                        } 
                     } else {
-                        log("about to build Pilgrim in " + randomDirX + ", " + randomDirY);
-                        return buildUnit(SPECS.PILGRIM, randomDirX, randomDirY);
+                        if(this.karbonite >= 10 && this.fuel >= 50){
+                            log("Resources are sufficient. Building Pilgrim in " + randomDirX + ", " + randomDirY + "and broadcasting ID for location searching.");
+                            signal(me.id, 2);
+                            return buildUnit(SPECS.PILGRIM, randomDirX, randomDirY);
+                        } else {
+                            log("Cannot build Pilgrim, resources are insufficient.");
+                        }
+                        
                     }
-                  } else {
+                } else {
                     return null;
                 } 
+                return null;
             }
         }
 
@@ -140,6 +154,12 @@ public class MyRobot extends BCAbstractRobot {
             	log("Self X: " + me.x + " Y: " + me.y);
             	homeLocationX = me.x;
             	homeLocationY = me.y;
+                log("Locating home castle...");
+                homeCastleID = findSignalingRobot(me);
+                log("Home Castle ID: " + homeCastleID);
+                homeCastleX = getRobot(homeCastleID).x;
+                homeCastleY = getRobot(homeCastleID).y;
+                log("Home Castle Coords: (" + homeCastleX + ", " + homeCastleY + ")");
 
             	log("Finding and recording closest Karbonite Mine...");
                 if(getKarboniteMap()[me.y][me.x] == true){
@@ -217,7 +237,9 @@ public class MyRobot extends BCAbstractRobot {
                         for(int x = me.x-1; x <= me.x+1; x++){
                             for(int y = me.y-1; y <= me.y+1; y++){
                                 log("Starting tile (" + x + ", " + y + ")");
-                               // if()
+                                //if(ge){
+
+                                
 
 
                             }
